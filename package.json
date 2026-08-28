@@ -1,0 +1,18 @@
+{
+  "name": "dsh-session-attention",
+  "version": "0.1.2-alpha.1",
+  "description": "Session attention overlay for DeepSeek Harness: a character dance animation in shell.overlay while any session awaits the user's action or a background reply finished unopened.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "client",
+    "bundle"
+  ],
+  "scripts": {
+    "typecheck": "tsc -b",
+    "lint": "oxlint .",
+    "build": "pnpm -r build"
+  },
+  "packageManager": "pnpm@11.7.0"
+}
