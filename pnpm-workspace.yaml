@@ -1,0 +1,25 @@
+packages:
+  - client
+  - bundle
+
+# Link workspace packages to each other (the bundle depends on the client);
+# every other dependency resolves through the overrides below.
+linkWorkspacePackages: true
+
+# pnpm 10+ blocks dependency install scripts until reviewed here. esbuild
+# ships a platform binary through its postinstall; the client build needs it.
+allowBuilds:
+  esbuild: true
+
+# The DSH runtime closure these plugins join owns every shared @deepseek-ai
+# package. Pinning them to a built deepseek-harness checkout keeps this
+# standalone install self-contained without an npm release of the framework.
+overrides:
+  '@deepseek-ai/cordis': 'link:../deepseek-harness/vendor/cordis'
+  '@deepseek-ai/dsh-api-session-controller': 'link:../deepseek-harness/packages/api/session-controller'
+  '@deepseek-ai/dsh-client-ui-layout': 'link:../deepseek-harness/packages/client/ui-layout'
+  '@deepseek-ai/dsh-client-ui-renderer': 'link:../deepseek-harness/packages/client/ui-renderer'
+  '@deepseek-ai/dsh-client-ui-session': 'link:../deepseek-harness/packages/client/ui-session'
+  '@deepseek-ai/dsh-client-ui-slots': 'link:../deepseek-harness/packages/client/ui-slots'
+  '@deepseek-ai/dsh-invariants': 'link:../deepseek-harness/packages/runtime-diagnostics/invariants'
+  '@deepseek-ai/dsh-session': 'link:../deepseek-harness/packages/core/session'
