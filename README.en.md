@@ -6,6 +6,8 @@ Session attention overlay plugin for [DeepSeek Harness](https://github.com/deeps
 
 A character peeks in from the top-right edge of the web GUI and plays a kind-specific dance animation while any session awaits the user's action (approval / plan review / question) or a background session's AI reply finished without being opened. The panel retreats when all sessions are handled.
 
+![Session attention overlay: the top-right character panel showing one completed-reply attention row](docs/attention.png)
+
 ## Architecture
 
 Two packages compose the full feature:
