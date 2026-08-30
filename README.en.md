@@ -47,7 +47,7 @@ The animation engine applies per-frame `translate / rotate / scale / squash` tra
 ## Installation
 
 ```sh
-dsh plugin --profile <name> add https://github.com/my-dsh/dsh-session-attention/releases/download/dist/dsh-session-attention-dist.tgz
+dsh plugin --profile <name> add github:my-dsh/dsh-session-attention#dist
 ```
 
 The panel renders only inside a web surface, so the target profile must already provide the client runtime, connection, and `shell.overlay` layout. Requires `pnpm` on `PATH`.
