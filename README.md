@@ -47,7 +47,7 @@
 ## 安装
 
 ```sh
-dsh plugin --profile <name> add github:my-dsh/dsh-session-attention#dist
+dsh plugin --profile <name> add https://github.com/my-dsh/dsh-session-attention/releases/download/dist/dsh-session-attention-dist.tgz
 ```
 
 面板仅在 web 界面中渲染，因此目标 profile 必须已提供 client 运行时、连接和 `shell.overlay` 布局。需要 `pnpm` 在 `PATH` 上。
