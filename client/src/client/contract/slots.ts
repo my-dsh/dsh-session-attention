@@ -1,9 +1,11 @@
 /**
- * Inject face for the session-attention overlay entry: the action that opens a
- * session when the user clicks one of its rows, plus the optional character
- * image URL. The component receives the standard `useSessions` hook through
- * {@link PropsRuntime} (root scope) — it never reaches for ctx.
+ * Inject face for the session-attention overlay entries: the action that opens
+ * a session when the user clicks one of its rows, the toast bridge's send
+ * action, and the optional character image URL. Components receive the
+ * standard `useSessions` hook through {@link PropsRuntime} (root scope) —
+ * they never reach for ctx.
  */
+import type { ToastSendRequest } from '../../types.ts'
 
 /** Inject face handed to the attention panel from the apply closure. */
 export interface SessionAttentionInjected {
@@ -11,4 +13,13 @@ export interface SessionAttentionInjected {
   openSession: (id: string) => void
   /** Optional character PNG URL or data-URI; undefined uses the procedural fallback. */
   characterImage?: string
+}
+
+/**
+ * Inject face handed to the toast bridge entry from the apply closure. The
+ * closure owns the mounted Remote namespace, so the bridge stays ctx-free.
+ */
+export interface ToastBridgeInjected {
+  /** Fire one desktop toast; a no-op when the Remote namespace is unavailable. */
+  sendToast: (request: ToastSendRequest) => void
 }

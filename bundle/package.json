@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-session-attention",
   "description": "The session attention overlay as a profile bundle: a patch layer inserting the browser-only attention panel over any web-surface profile",
-  "version": "0.1.2-alpha.1",
+  "version": "0.2.0-alpha.0",
   "publishConfig": {
     "access": "public"
   },

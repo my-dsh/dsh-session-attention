@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-session-attention",
   "description": "Web GUI session attention overlay: a Three.js animation panel in shell.overlay that persists while any session awaits the user's action (approval / plan review / question) or a background session's AI reply finished unopened",
-  "version": "0.1.2-alpha.1",
+  "version": "0.2.0-alpha.0",
   "publishConfig": {
     "access": "public"
   },
@@ -48,6 +48,7 @@
     "@deepseek-ai/dsh-client-ui-session": "^0.1.2-alpha.1",
     "@deepseek-ai/dsh-invariants": "^0.1.2-alpha.1",
     "@deepseek-ai/dsh-session": "^0.1.2-alpha.1",
+    "@deepseek-ai/dsh-typert-protocol": "^0.1.2-alpha.3",
     "@deepseek-ai/cordis": "^4.0.1"
   },
   "devDependencies": {
@@ -58,6 +59,7 @@
     "@deepseek-ai/dsh-client-ui-slots": "^0.1.2-alpha.1",
     "@deepseek-ai/dsh-invariants": "^0.1.2-alpha.1",
     "@deepseek-ai/dsh-session": "^0.1.2-alpha.1",
+    "@deepseek-ai/dsh-typert-protocol": "^0.1.2-alpha.3",
     "@types/react": "~18.3.1",
     "@deepseek-ai/cordis": "^4.0.1",
     "react": "^18.2.0"
