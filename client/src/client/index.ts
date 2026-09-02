@@ -54,7 +54,6 @@ export interface Config {
  */
 interface RemoteFace {
   $mount: (contribution: object) => Promise<() => unknown>
-  sessionAttentionToast?: SessionAttentionToastRemoteNamespace
 }
 
 /** Services required: the slot registry, the sessions service, and the Remote mount. */
@@ -83,14 +82,21 @@ export async function apply(ctx: ClientContext, config: Config = {}): Promise<vo
   let sendToast: (request: ToastSendRequest) => void = () => {}
   if (config.toast !== false && remote !== undefined && typeof remote.$mount === 'function') {
     const mounting = remote.$mount(TYPERT_REMOTE)
-    const mounted = mounting.then(() => remote)
+    // Read the mounted namespace through ctx.get, the inject-free optional
+    // read: a mounted Remote namespace is a Service under
+    // 'remote.sessionAttentionToast', and Cordis gated property access
+    // (face.sessionAttentionToast) requires an inject declaration this
+    // self-mounting plugin can never satisfy — it would deadlock on its own
+    // startup. ctx.get resolves the same instance without the gate.
+    const mounted = mounting.then(() =>
+      ctx.get('remote.sessionAttentionToast') as SessionAttentionToastRemoteNamespace | undefined)
     ctx.effect(async () => {
       const disposer = await mounting
       return () => { void disposer() }
     }, 'session-attention.toastRemote')
     sendToast = (request) => {
       void mounted
-        .then(face => face.sessionAttentionToast?.send(request))
+        .then(namespace => namespace?.send(request))
         .catch(() => {})
     }
   }
