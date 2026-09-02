@@ -72,8 +72,11 @@ function registrationScript(): string {
 }
 
 /**
- * One toast render. The whole XML crosses as base64 UTF-8; the script itself
- * stays pure ASCII so the WSL console codepage can never mangle copy.
+ * One toast render. The whole XML crosses as base64 UTF-8 inside the script;
+ * the script itself is pure ASCII so the WSL console codepage can never mangle
+ * copy. It crosses via `-EncodedCommand` (UTF-16LE base64): WSL interop
+ * swallows a piped-stdin script under `-Command -` — the process exits 0
+ * without executing the script — so the stdin transport is unusable here.
  */
 function toastScript(request: ToastSendRequest): string {
   const xmlBase64 = Buffer.from(toastXml(request), 'utf8').toString('base64')
@@ -165,15 +168,21 @@ export class SessionAttentionToastService extends TypertRemoteService {
     }
   }
 
-  /** Run one ASCII script through the bridge; never rejects. */
+  /**
+   * Run one ASCII script through the bridge; never rejects. The script
+   * crosses via `-EncodedCommand` (UTF-16LE base64): WSL interop swallows a
+   * piped-stdin script under `-Command -` — the process exits 0 without
+   * executing the script — so the stdin transport is unusable here.
+   */
   private run(exe: string, script: string): Promise<BridgeOutcome> {
     return new Promise((resolve) => {
       let text = ''
       let child: ReturnType<typeof spawn>
       try {
-        child = spawn(exe, ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', '-'], {
+        const encoded = Buffer.from(script, 'utf16le').toString('base64')
+        child = spawn(exe, ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', encoded], {
           cwd: tmpdir(),
-          stdio: ['pipe', 'pipe', 'pipe'],
+          stdio: ['ignore', 'pipe', 'pipe'],
         })
       } catch {
         resolve({ ok: false, text: 'bridge-spawn-failed' })
@@ -192,10 +201,8 @@ export class SessionAttentionToastService extends TypertRemoteService {
       }, SPAWN_TIMEOUT_MS)
       child.stdout?.on('data', (chunk: Buffer) => { text += chunk.toString('utf8') })
       child.stderr?.on('data', (chunk: Buffer) => { text += chunk.toString('utf8') })
-      child.stdin?.on('error', () => {})
       child.on('error', () => finish(false))
       child.on('close', code => finish(code === 0))
-      child.stdin?.end(script)
     })
   }
 }
