@@ -14,10 +14,10 @@
 
 | 包 | 名称 | 角色 |
 |---|---|---|
-| `client/` | `@deepseek-ai/dsh-client-ui-session-attention` | 纯浏览器插件：一个 `shell.overlay` 入口，监听会话列表并渲染 Canvas2D 角色动画 |
+| `client/` | `@deepseek-ai/dsh-client-ui-session-attention` | 双面插件：浏览器半部渲染 `shell.overlay` 角色动画并通过 Typert Remote 调用 host 半部；host 半部是 `sessionAttentionToast` 服务，把通知渲染成原生 Win11 Toast |
 | `bundle/` | `@deepseek-ai/dsh-session-attention` | Profile bundle：一个 `cordis.patch.yml` 插入客户端面板行 |
 
-该插件是**纯客户端**的——没有 host 半插件、没有 Service Definition、没有事件。它读取 web 界面已提供的标准 `useSessions` 和 `useSessionPendingInteraction` 数据流。
+该插件由**浏览器半部 + 一个 host 半部服务**组成：浏览器半部从 web 界面已提供的标准 `useSessions` 和 `useSessionPendingInteraction` 数据流派生关注行，既渲染右上角角色动画，也会话进入关注态时通过 Typert 网关调用 host 半部的 `sessionAttentionToast` 服务，由后者驱动 Windows PowerShell 弹出原生 Toast（WSL 环境下走 `/mnt/c/Windows/.../powershell.exe` 互操作）。
 
 ### 数据流
 
@@ -25,12 +25,17 @@
 会话状态 → useSessions hook（完成提醒）
            useSessionPendingInteraction hook（审批/计划待审/提问）
                                ↓
-               selectAttention(list, pending) — 纯派生
+               selectAttention(list, pending) — 纯派生（动画与 Toast 共用同一份）
                                ↓
                AttentionPanel（shell.overlay 入口）
                ├── 角色动画（Canvas2D）
                ├── 关注行（点击打开会话）
-               └── 浏览器标签页标题前缀 (N)
+               ├── 浏览器标签页标题前缀 (N)
+               └── ToastBridge（shell.overlay 入口）
+                       ↓ 会话进入关注态时
+               sessionAttentionToast 服务（host 半部，Typert Remote）
+                       ↓
+               Windows PowerShell → 原生 Win11 Toast
 ```
 
 ### 角色动画
@@ -76,14 +81,17 @@ dsh plugin --profile web add https://github.com/my-dsh/dsh-session-attention/rel
 dsh-session-attention/
 ├── client/
 │   ├── src/
-│   │   ├── index.ts               # Host 加载入口（空 apply）
+│   │   ├── index.ts               # Host 半部：sessionAttentionToast 服务（Win11 Toast 桥）
 │   │   ├── invariant.ts           # 包不变量伴随
 │   │   ├── css-modules.d.ts       # CSS Modules 类型声明
+│   │   ├── types.ts               # Toast 请求/响应线协议（host 与 client 共用）
 │   │   └── client/
-│   │       ├── index.ts           # 浏览器插件：shell.overlay 注册
+│   │       ├── index.ts           # 浏览器插件：shell.overlay 注册 + 挂载 Toast Remote 命名空间
 │   │       ├── attention.ts       # 纯关注行选择逻辑
 │   │       ├── AttentionPanel.tsx # 面板组件（行 + 画布）
-│   │       ├── character.ts       # Canvas2D 动画引擎（624 行）
+│   │       ├── toast-bridge.tsx   # Toast 桥：派生同一份关注行，会话进入关注态时触发 Toast
+│   │       ├── typert.ts          # 手写 Consumer Remote 描述（sessionAttentionToast/send）
+│   │       ├── character.ts       # Canvas2D 动画引擎
 │   │       ├── character-lifecycle.ts  # peek→enter→dance→exit 状态机
 │   │       ├── contract/
 │   │       │   └── slots.ts       # Inject face 契约
