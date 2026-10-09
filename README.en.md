@@ -17,15 +17,15 @@ Two packages compose the full feature:
 | `client/` | `@deepseek-ai/dsh-client-ui-session-attention` | Pure browser plugin: one `shell.overlay` entry watching the session list and rendering a Canvas2D character animation |
 | `bundle/` | `@deepseek-ai/dsh-session-attention` | Profile bundle: one `cordis.patch.yml` inserting the client panel row |
 
-This plugin is **pure client-side** — it has no host half, no Service Definition, and no events. It reads the standard `useSessions` and `useSessionPendingInteraction` feeds already provided by the web surface.
+This plugin is **pure client-side** — it has no host half, no Service Definition, and no events. It reads the standard `useSessions` and `useSessionStatus` feeds already provided by the web surface.
 
 ### Data flow
 
 ```
-Session state → useSessions hook (completed reminders)
-                useSessionPendingInteraction hook (approval/plan-review/question)
+Session state → useSessions hook (rows and titles)
+                useSessionStatus hook (pendingInteraction, completionUnread)
                                         ↓
-                    selectAttention(list, pending) — pure derivation
+                    selectAttention(list, status) — pure derivation
                                         ↓
                     AttentionPanel (shell.overlay entry)
                     ├── Character animation (Canvas2D)
@@ -77,7 +77,6 @@ dsh-session-attention/
 ├── client/
 │   ├── src/
 │   │   ├── index.ts               # Host loader entry (empty apply)
-│   │   ├── invariant.ts           # Package invariant companion
 │   │   ├── css-modules.d.ts       # CSS Modules type declarations
 │   │   └── client/
 │   │       ├── index.ts           # Browser plugin: shell.overlay registration
@@ -92,8 +91,7 @@ dsh-session-attention/
 ├── bundle/
 │   ├── cordis.patch.yml           # 1-row insert: client panel
 │   ├── src/
-│   │   ├── index.ts               # Empty carrier
-│   │   └── invariant.ts           # Bundle invariant companion
+│   │   └── index.ts               # Empty carrier
 │   └── package.json
 └── package.json                   # Root workspace
 ```
@@ -105,7 +103,7 @@ This plugin depends on the following DSH packages (installed from the DSH monore
 - `@deepseek-ai/cordis` — Cordis plugin framework
 - `@deepseek-ai/dsh-client-ui-layout` — `shell.overlay` slot owner
 - `@deepseek-ai/dsh-client-ui-renderer` — Slot registry service
-- `@deepseek-ai/dsh-client-ui-session` — `useSessions` and `useSessionPendingInteraction` hooks
+- `@deepseek-ai/dsh-client-ui-session` — `useSessions` and `useSessionStatus` hooks (`SessionStatus`, `SessionStatusSnapshot`)
 - `@deepseek-ai/dsh-api-session-controller` — `SessionListState`, `SessionSummary`, `PendingInteractionStatus`
 - `@deepseek-ai/dsh-session` — `SessionId` branded type
 

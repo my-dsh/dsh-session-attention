@@ -1,9 +1,11 @@
 /**
  * Pure selection of the "attention" rows this overlay surfaces, derived from
- * the standard {@link SessionListState} plus the pending-interaction
- * snapshot. The session list carries `completed` (the green "done" reminder);
- * pending interactions (approval / plan-review / question) arrive on a
- * separate standard hook — {@link selectAttention} merges the two so the
+ * the standard {@link SessionListState} plus the unified Session UI status
+ * snapshot. That snapshot indexes one {@link SessionStatus} per Session,
+ * carrying both facts this overlay surfaces: `pendingInteraction` (the
+ * approval / plan-review / question awaiting an answer) and
+ * `completionUnread` (a reply that finished outside the main view).
+ * {@link selectAttention} merges the list with the status snapshot so the
  * caller drives both feeds through one pure derivation.
  *
  * The selector returns a plain, sorted array so a snapshot selector hook can
@@ -13,6 +15,7 @@
 import type {
   PendingInteractionStatus, SessionListState, SessionSummary,
 } from '@deepseek-ai/dsh-api-session-controller/client'
+import type { SessionStatus, SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 
 /** Attention kind union this overlay surfaces. */
@@ -60,27 +63,28 @@ export function attentionKindOf(kind: string | undefined): PendingInteractionSta
 }
 
 /**
- * Derive the attention rows from one session list snapshot plus the
- * pending-interaction snapshot. Blank sessions never surface: a blank row is
+ * Derive the attention rows from one session list snapshot plus the unified
+ * Session UI status snapshot. Blank sessions never surface: a blank row is
  * a provisional New Session that cannot await anything. The currently-open
  * session surfaces like any other when its reply completes. A pending
  * interaction outranks a completed reminder for the same session.
  * @param state - the useSessions snapshot.
- * @param pending - the useSessionPendingInteraction snapshot (sessionId → interaction).
+ * @param status - the useSessionStatus snapshot (Session id → status).
  * @returns the sorted attention rows.
  */
 export function selectAttention(
   state: SessionListState,
-  pending?: ReadonlyMap<SessionId, { kind: string }>,
+  status?: SessionStatusSnapshot,
 ): AttentionRow[] {
   const rows: AttentionRow[] = []
   for (const id of state.ids) {
     const row: SessionSummary | undefined = state.byId[id]
     if (row === undefined || row.blank) continue
-    const kind = pending !== undefined ? attentionKindOf(pending.get(id)?.kind) : undefined
+    const entry: SessionStatus | undefined = status?.get(id)
+    const kind = attentionKindOf(entry?.pendingInteraction?.kind)
     if (kind !== undefined) {
       rows.push({ kind, id, title: row.displayTitle })
-    } else if (row.completed === true) {
+    } else if (entry?.completionUnread === true) {
       rows.push({ kind: 'completed', id, title: row.displayTitle })
     }
   }

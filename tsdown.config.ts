@@ -11,7 +11,7 @@ export default defineConfig(({ env }) => {
   const client = env?.DSH_BUILD_FACE === 'client'
   return {
     workspace: ['client', 'bundle'],
-    entry: client ? '' : ['lib/types/{index,invariant}.js'],
+    entry: client ? '' : ['lib/types/index.js'],
     outDir: 'lib',
     format: ['esm'],
     platform: 'node',

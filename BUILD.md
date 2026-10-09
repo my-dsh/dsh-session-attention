@@ -27,9 +27,9 @@ Outputs:
 | Artifact | Consumer |
 | --- | --- |
 | `client/lib/types/**` | tsc declarations; tsdown bundles from them |
-| `client/lib/index.js`, `client/lib/invariant.js` | Node-half loader entries (empty apply + invariant companion) |
+| `client/lib/index.js` | Node-half loader entry (empty apply) |
 | `client/lib/client.js` | Browser bundle (`window.__ModuleLoader__.load` closure; CSS inlined) |
-| `bundle/lib/index.js`, `bundle/lib/invariant.js` | Bundle package Node half |
+| `bundle/lib/index.js` | Bundle package Node half |
 | `bundle/cordis.patch.yml` | The patch layer the profile composer reads |
 
 ## Install into a profile

@@ -2,15 +2,16 @@
  * Inject face for the session-attention overlay entries: the action that opens
  * a session when the user clicks one of its rows, the toast bridge's send
  * action, and the optional character image URL. Components receive the
- * standard `useSessions` hook through {@link PropsRuntime} (root scope) —
- * they never reach for ctx.
+ * standard `useSessions` and `useSessionStatus` hooks through
+ * {@link PropsRuntime} (root scope) — they never reach for ctx.
  */
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { ToastSendRequest } from '../../types.ts'
 
 /** Inject face handed to the attention panel from the apply closure. */
 export interface SessionAttentionInjected {
   /** Open (select) one session in the sidebar. */
-  openSession: (id: string) => void
+  openSession: (id: SessionId) => void
   /** Optional character PNG URL or data-URI; undefined uses the procedural fallback. */
   characterImage?: string
 }

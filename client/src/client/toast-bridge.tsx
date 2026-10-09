@@ -2,7 +2,7 @@
  * The desktop toast bridge: an invisible `shell.overlay` entry that derives
  * the SAME attention rows the character panel renders — one pure
  * {@link selectAttention} call over the standard `useSessions` and
- * `useSessionPendingInteraction` feeds — and fires one desktop toast through
+ * `useSessionStatus` feeds — and fires one desktop toast through
  * the injected send action whenever a session ENTERS attention (an id that was
  * absent from the previous snapshot). No rows, no toast; the overlay's dance
  * and the desktop notification are two renderings of one rule.
@@ -19,7 +19,7 @@ import { selectAttention, type AttentionKind, type AttentionRow } from './attent
 import type { ToastBridgeInjected } from './contract/slots.ts'
 import type { ToastSendRequest } from '../types.ts'
 
-/** Props the shell.overlay owner hands the bridge (standard `useSessions`). */
+/** Props the shell.overlay owner hands the bridge (standard `useSessions` and `useSessionStatus`). */
 export interface ToastBridgeProps extends PropsRuntime<'shell.overlay'>, InjectFace<ToastBridgeInjected> {}
 
 /** Per-kind toast copy; the body carries the session title (and batch count). */
@@ -43,14 +43,14 @@ function toastRequest(kind: AttentionKind, row: AttentionRow, count: number): To
 /**
  * The toast bridge component. Renders nothing; watches the attention rows and
  * reports sessions entering attention through the injected send action.
- * @param props - the standard useSessions hook plus the send action.
+ * @param props - the standard useSessions and useSessionStatus hooks plus the send action.
  */
-export function ToastBridge({ useSessions, useSessionPendingInteraction, sendToast }: ToastBridgeProps): null {
+export function ToastBridge({ useSessions, useSessionStatus, sendToast }: ToastBridgeProps): null {
   const list = useSessions(s => s)
-  const pending = useSessionPendingInteraction(s => s)
+  const status = useSessionStatus(s => s)
   const rows = useMemo(
-    () => selectAttention(list, pending),
-    [list, pending],
+    () => selectAttention(list, status),
+    [list, status],
   )
   // The rows array is the diff input; the joined id signature is the effect
   // trigger (a pure function of the rows, so the closure never goes stale).

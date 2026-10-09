@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-session-attention",
   "description": "The session attention overlay as a profile bundle: a patch layer inserting the browser-only attention panel over any web-surface profile",
-  "version": "0.2.0-alpha.1",
+  "version": "0.2.1-alpha.1",
   "publishConfig": {
     "access": "public"
   },
@@ -18,17 +18,12 @@
       "types": "./lib/types/index.d.ts",
       "default": "./lib/index.js"
     },
-    "./invariant": {
-      "types": "./lib/types/invariant.d.ts",
-      "default": "./lib/invariant.js"
-    },
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [
     "lib/index.js",
-    "lib/invariant.js",
     "cordis.patch.yml",
     "lib/types/**/*.d.ts"
   ],
@@ -42,11 +37,9 @@
     "@deepseek-ai/dsh-client-ui-session-attention": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-invariants": "^0.1.2-alpha.1",
     "@deepseek-ai/cordis": "^4.0.1"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-invariants": "^0.1.2-alpha.1",
     "@deepseek-ai/cordis": "^4.0.1"
   }
 }

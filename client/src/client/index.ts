@@ -21,8 +21,12 @@ import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 // Type-only: pulls the SlotRegistry service merge (ctx.slots).
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
-// Type-only: pulls the Session standard-hook merge (useSessions on root props).
+// Type-only: pulls the Session standard-hook merge (useSessions and
+// useSessionStatus on root props).
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
+// Type-only: pulls the UiWorkspace Context merge (ctx.uiWorkspace).
+import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { AttentionPanel } from './AttentionPanel.tsx'
 import type { SessionAttentionInjected, ToastBridgeInjected } from './contract/slots.ts'
 import { ToastBridge } from './toast-bridge.tsx'
@@ -56,8 +60,8 @@ interface RemoteFace {
   $mount: (contribution: object) => Promise<() => unknown>
 }
 
-/** Services required: the slot registry, the sessions service, and the Remote mount. */
-export const inject = ['slots', 'sessions', 'remote']
+/** Services required: the slot registry and the Remote mount. */
+export const inject = ['slots', 'remote']
 
 /**
  * Client plugin body: mount the toast Remote namespace, then contribute the
@@ -68,10 +72,14 @@ export const inject = ['slots', 'sessions', 'remote']
  * @param config - plugin config (character image URL, toast bridge toggle).
  */
 export async function apply(ctx: ClientContext, config: Config = {}): Promise<void> {
-  const sessions = ctx.get('sessions')
+  // Navigation belongs to the Workspace domain owner: selecting a Session and
+  // showing its Conversation is one `uiWorkspace.openSession` action. Read it
+  // through ctx.get so an assembly without the Workspace browser degrades to an
+  // inert row instead of failing the overlay.
+  const uiWorkspace = ctx.get('uiWorkspace') as { openSession(target: SessionId): void } | undefined
   const injected = (): SessionAttentionInjected => ({
     openSession: (id) => {
-      if (sessions !== undefined) sessions.open(id as never)
+      uiWorkspace?.openSession(id)
     },
   })
 

@@ -9,8 +9,8 @@
  * drives the peek → enter → dance → exit → peek cycle. State transitions are
  * driven synchronously by `hasAttention` changes; the character scene's own RAF
  * loop animates the progress within the current phase. The attention rows are
- * derived from the standard `useSessions` hook with the same data the sidebar
- * status dots use.
+ * derived from the standard `useSessions` and `useSessionStatus` hooks with the
+ * same data the sidebar status dots use.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { InjectFace, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
@@ -52,7 +52,7 @@ function kindLabel(t: Translate, kind: AttentionKind): string {
   return t(kind)
 }
 
-/** Props the shell.overlay owner hands the entry (standard `useSessions`). */
+/** Props the shell.overlay owner hands the entry (standard `useSessions` and `useSessionStatus`). */
 export interface AttentionPanelProps extends PropsRuntime<'shell.overlay'>, InjectFace<SessionAttentionInjected> {
   /** Optional localized translator (defaults to Chinese copy). */
   t?: Translate
@@ -74,20 +74,21 @@ const MAX_ROWS = 5
  * The attention overlay panel. Renders only a small peeking character while no
  * session needs attention; jumps out to dance and show the full panel when
  * attention is owed.
- * @param props - the standard useSessions hook plus the open-session action.
+ * @param props - the standard useSessions and useSessionStatus hooks plus the open-session action.
  */
 export function AttentionPanel({
-  useSessions, useSessionPendingInteraction, openSession, characterImage, t, env, createScene,
+  useSessions, useSessionStatus, openSession, characterImage, t, env, createScene,
 }: AttentionPanelProps) {
-  // The session list carries `completed` reminders; pending interactions
-  // (approval / plan-review / question) arrive on a separate standard hook.
-  // Both are framework-made hooks; the merge is a pure derivation over their
-  // snapshots, never its own subscription.
+  // The session list supplies the rows; the unified Session UI status snapshot
+  // supplies both attention facts per Session — `pendingInteraction`
+  // (approval / plan-review / question) and `completionUnread`. Both are
+  // framework-made hooks; the merge is a pure derivation over their snapshots,
+  // never its own subscription.
   const list = useSessions(s => s)
-  const pending = useSessionPendingInteraction(s => s)
+  const status = useSessionStatus(s => s)
   const rows = useMemo(
-    () => selectAttention(list, pending),
-    [list, pending],
+    () => selectAttention(list, status),
+    [list, status],
   )
   const translate: Translate = t ?? ((key, vars) => DEFAULT_COPY[key](vars))
   const count = rows.length

@@ -85,14 +85,14 @@ export const TYPERT_REMOTE: TypertRemoteContribution = {
           codec: {
             mode: 'strict',
             typeSymbol: '@deepseek-ai/dsh-client-ui-session-attention/types#ToastSendRequest',
-            schema: toastRequestSchema(),
+            create: toastRequestSchema,
           },
         },
       ],
       result: {
         mode: 'strict',
         typeSymbol: '@deepseek-ai/dsh-client-ui-session-attention/types#ToastSendResult',
-        schema: toastResultSchema(),
+        create: toastResultSchema,
       },
     },
   ],
