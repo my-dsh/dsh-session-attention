@@ -76,9 +76,17 @@ export async function apply(ctx: ClientContext, config: Config = {}): Promise<vo
   // showing its Conversation is one `uiWorkspace.openSession` action. Read it
   // through ctx.get so an assembly without the Workspace browser degrades to an
   // inert row instead of failing the overlay.
-  const uiWorkspace = ctx.get('uiWorkspace') as { openSession(target: SessionId): void } | undefined
+  //
+  // The read is deferred to the click, never captured here. `ui-workspace`
+  // provides the service only once its own requirements settle —
+  // `remote.directoryPicker` and `remoteAccess` arrive in a later client load
+  // batch, and dsh.client.inject edges are informational, never apply
+  // sequencing — so this plugin's apply (inject: slots + remote) can run first.
+  // An apply-time read therefore races the provider and captures `undefined`
+  // for the whole session, leaving every row click dead.
   const injected = (): SessionAttentionInjected => ({
     openSession: (id) => {
+      const uiWorkspace = ctx.get('uiWorkspace') as { openSession(target: SessionId): void } | undefined
       uiWorkspace?.openSession(id)
     },
   })
